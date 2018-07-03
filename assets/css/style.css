@@ -1,0 +1,12 @@
+body {
+    background-image: url("../images/mekong-green.png");
+}
+
+.table-title > th {
+    font-weight: bold;
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 0.20rem;
+}
