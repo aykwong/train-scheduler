@@ -11,16 +11,15 @@ firebase.initializeApp(config);
 
 var database = firebase.database();
 
-var trainStats = {
+var train = {
+  trainStats: {
   name: "",
   destination: "",
   firstTrainTime: "",
   frequency: 0,
   nextArrival: "",
   minutesAway: 0
-};
-
-var trainSchedule = [];
+}};
 
 var datetime = "",
         date = "";
@@ -41,28 +40,19 @@ $("#submit").on("click", function addTrain(event) {
   event.preventDefault();
 
   //Assigning user input to object variable
-  trainStats.name = $("#name").val().trim();
-  trainStats.destination = $("#destination").val().trim();
-  trainStats.firstTrainTime = moment($("#time").val(), "LT").format("HH:mm A");
-  trainStats.frequency = parseInt($("#frequency").val().trim());
+  train.trainStats.name = $("#name").val().trim();
+  train.trainStats.destination = $("#destination").val().trim();
+  train.trainStats.firstTrainTime = moment($("#time").val(), "LT").format("HH:mm A");
+  train.trainStats.frequency = parseInt($("#frequency").val().trim());
 
   //Calculating the minutes to arrival and next arrival time
   trainCalculations();
   
-  //Pushing Array variable to Firebase database
-  database.ref("trainTimes").push(trainStats);
-  
-  //Push object variable to array variable
-  trainSchedule.push(trainStats);
+  //Pushing object variable to Firebase database
+  database.ref("trainTimes").push(train.trainStats);
 
   //Appending information and data to the table
-  let train = $("<tr>");
-  train.append(`<td>${trainStats.name}</td>`);
-  train.append(`<td>${trainStats.destination}</td>`);
-  train.append(`<td>${trainStats.frequency}</td>`);
-  train.append(`<td>${trainStats.nextArrival}</td>`);
-  train.append(`<td>${trainStats.minutesAway}</td>`);
-  $(".table").append(train);
+  rowCreation();
 
   //Clearing the user input fields for next input
   $("#name").val("");
@@ -73,17 +63,52 @@ $("#submit").on("click", function addTrain(event) {
 
 function trainCalculations() {
     //Calculation for nextArrivel and minutesAway
-    let converted = moment(trainStats.firstTrainTime, "HH:mm").subtract(1, "years");
+    let converted = moment(train.trainStats.firstTrainTime, "HH:mm").subtract(1, "years");
     console.log(converted);
     let timeDiff = moment().diff(moment(converted), "minutes");
     console.log(timeDiff);
-    let remainder = timeDiff % trainStats.frequency;
+    let remainder = timeDiff % train.trainStats.frequency;
     console.log(remainder);
-    trainStats.minutesAway = trainStats.frequency - remainder;
-    console.log(trainStats.minutesAway);
-    trainStats.nextArrival = moment().add(trainStats.minutesAway, "minutes").format("HH:mm A");
-    console.log(trainStats.nextArrival);
+    train.trainStats.minutesAway = train.trainStats.frequency - remainder;
+    console.log(train.trainStats.minutesAway);
+    train.trainStats.nextArrival = moment().add(train.trainStats.minutesAway, "minutes").format("HH:mm A");
+    console.log(train.trainStats.nextArrival);
 }
+
+function rowCreation() {
+  let train = $("<tr>");
+  train.append(`<td>${train.trainStats.name}</td>`);
+  train.append(`<td>${train.trainStats.destination}</td>`);
+  train.append(`<td>${train.trainStats.frequency}</td>`);
+  train.append(`<td>${train.trainStats.nextArrival}</td>`);
+  train.append(`<td>${train.trainStats.minutesAway}</td>`);
+  $(".table").append(train);
+
+}
+
+database.ref("/trainTimes").on("value", function(snapshot) {
+
+  if (snapshot.child().exists()) {
+
+    $(snapshot.child()).each(function (snapshot) {
+      trainStats.name = snapshot.val().name;
+      trainStats.destination = snapshot.val().destination;
+      trainStats.firstTrainTime = snapshot.firstTrainTime;
+      trainStats.frequency = snapshot.val().frequency;
+      trainStats.nextArrival = snapshot.val().nextArrival;
+      trainStats.minutesAway = snapshot.val().minutesAway;
+
+    trainCalculations();
+
+
+
+    })
+  }
+  
+  // If any errors are experienced, log them to console.
+}, function(errorObject) {
+  console.log("The read failed: " + errorObject.code);
+});
 
 // function updateTime() {
 //   for(var i = 0; 0 < trainSchedule.length; i++) {
