@@ -89,7 +89,7 @@ database.ref("/trainTimes").on("child_added", function(childSnapshot) {
   train.append(`<td>${childSnapshot.val().frequency}</td>`);
   train.append(`<td>${childSnapshot.val().nextArrival}</td>`);
   train.append(`<td>${childSnapshot.val().minutesAway}</td>`);
-  $(".table").append(train);
+  $(".table-body").append(train);
   
 }, function(errorObject) {
   console.log("The read failed: " + errorObject.code);
