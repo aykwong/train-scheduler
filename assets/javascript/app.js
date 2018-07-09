@@ -34,21 +34,25 @@ $(document).ready(function(){
     datetime = $('#currentTime')
     update();
     setInterval(update, 1000);
-    setInterval(updateTime, 1000);
+    // setInterval(updateTime, 1000);
 });
 
 $("#submit").on("click", function addTrain(event) {
   event.preventDefault();
 
+  //Assigning user input to object variable
   trainStats.name = $("#name").val().trim();
   trainStats.destination = $("#destination").val().trim();
   trainStats.firstTrainTime = moment($("#time").val(), "LT").format("HH:mm A");
   trainStats.frequency = parseInt($("#frequency").val().trim());
 
-  database.ref("trainTimes").push(trainStats);
-
+  //Calculating the minutes to arrival and next arrival time
   trainCalculations();
-
+  
+  //Pushing Array variable to Firebase database
+  database.ref("trainTimes").push(trainStats);
+  
+  //Push object variable to array variable
   trainSchedule.push(trainStats);
 
   //Appending information and data to the table
@@ -60,13 +64,12 @@ $("#submit").on("click", function addTrain(event) {
   train.append(`<td>${trainStats.minutesAway}</td>`);
   $(".table").append(train);
 
+  //Clearing the user input fields for next input
   $("#name").val("");
   $("#destination").val("");
   $("#time").val("");
   $("#frequency").val("");
 });
-
-
 
 function trainCalculations() {
     //Calculation for nextArrivel and minutesAway
@@ -82,14 +85,14 @@ function trainCalculations() {
     console.log(trainStats.nextArrival);
 }
 
-function updateTime() {
-  for(var i = 0; 0 < trainSchedule.length; i++) {
-    trainStats.firstTrainTime = trainSchedule[i].firstTrainTime;
-    trainStats.frequency = trainSchedule[i].frequency;
-    trainCalculations();
-    let trainRef = ref.child()
+// function updateTime() {
+//   for(var i = 0; 0 < trainSchedule.length; i++) {
+//     trainStats.firstTrainTime = trainSchedule[i].firstTrainTime;
+//     trainStats.frequency = trainSchedule[i].frequency;
+//     trainCalculations();
+//     let trainRef = ref.child()
 
-  }
+//   }
 
-  database.ref("trainTimes").on("value")
-}
+//   database.ref("trainTimes").on("value")
+// }
